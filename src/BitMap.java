@@ -710,28 +710,10 @@ class BitMapHeader {
 // Create a mutable counter
 class Counter {
     private int val_;
-
-    public Counter() {
-        val_ = 0;
-    }
-
-    public int value() {
-        return val_;
-    }
-
-    public void set(int val) {
-        val_ = val;
-    }
-
-    public void reset() {
-        val_ = 0;
-    }
-
-    public int inc() {
-        return val_++;
-    }
-
-    public int dec() {
-        return val_--;
-    }
+    public Counter() { val_ = 0; }
+    public int value() { return val_; }
+    public void set(int val) { val_ = val; }
+    public void reset() { val_ = 0; }
+    public int inc() { return val_++; }
+    public int dec() { return val_--; }
 }

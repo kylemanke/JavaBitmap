@@ -1,139 +1,174 @@
-import java.util.Arrays;
-import java.lang.Math.*;
+import java.util.Properties;
+import java.util.Scanner;
 
 public class ImageProcessor {
-    public static void main(String[] args) {
-        // Check arguments
-        if (args.length != 2) {
-            System.err.println("arguments: inputFile outputFile");
-            return;
-        }
-
-        int[][] bmp = null;
-
-        try {
-            bmp = BitMap.ReadGreyScale(args[0]);
-            Display.DisplayGreyscale(bmp);
-            BitMap.OutputGreyScale(args[1], bmp);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public static void FlipHorizontally(int[][] bmp) {
         // TODO: Write code to flip the bmp matrix horizontally
-        int height = bmp.length;
-        int width = bmp[0].length;
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width/2; ++j) {
-                int temp = bmp[i][j];
-                bmp[i][j] = bmp[i][width-1-j];
-                bmp[i][width-1-j] = temp;
-            }
-        }
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void FlipHorizontally(int[][][] bmp) {
+        // TODO: Write code to flip the bmp matrix horizontally
+        System.out.println("This function has not been implemented yet.");
     }
 
     public static void FlipVertically(int[][] bmp) {
         // TODO: Write code to flip the bmp matrix vertically
-        int height = bmp.length;
-        int width = bmp[0].length;
-        for (int i = 0; i < height/2; ++i) {
-            for (int j = 0; j < width; ++j) {
-                int temp = bmp[i][j];
-                bmp[i][j] = bmp[height - 1 - i][j];
-                bmp[height - 1 - i][j] = temp;
-            }
-        }
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void FlipVertically(int[][][] bmp) {
+        // TODO: Write code to flip the bmp matrix vertically
+        System.out.println("This function has not been implemented yet.");
     }
 
     public static void Transpose(int[][] bmp) {
         // TODO: Write code to transpose the matrix
-        int height = bmp.length;
-        int width = bmp[0].length;
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < i; ++j) {
-                int temp = bmp[i][j];
-                bmp[i][j] = bmp[j][i];
-                bmp[j][i] = temp;
-            }
-        }
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void Transpose(int[][][] bmp) {
+        // TODO: Write code to transpose the matrix
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void Invert(int[][] bmp) {
+        // TODO: Write code to invert the matrix
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void Invert(int[][][] bmp) {
+        // TODO: Write code to invert the matrix
+        System.out.println("This function has not been implemented yet.");
     }
 
     public static void GaussianBlur(int[][] bmp, int k, double sigma) {
-        // K must be odd
-        if (k % 2 == 0)
-            return;
-        double[][] kernel = GenerateGaussianKernel(k, sigma);
+        // TODO
+        System.out.println("This function has not been implemented yet.");
+    }
 
-        // Challenge:
-        int mid = k / 2;
-        int height = bmp.length;
-        int width = bmp[0].length;
-        int[][] result = new int[height][width];
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                int new_pixel = 0;
-                for (int y = -mid; y <= mid; ++y) {
-                    for (int x = -mid; x <= mid; ++x) {
-                        // Check bounds
-                        if ((i + y) < 0 || (i + y) >= height || (j + x) < 0 || (j + x) >= width) {
-                            continue;
-                        }
-                        new_pixel += (int)(kernel[mid + y][mid+x] * bmp[i+y][x+j]);
-                    }
+    public static void GaussianBlur(int[][][] bmp, int k, double sigma) {
+        // TODO
+        System.out.println("This function has not been implemented yet.");
+    }
+
+    public static void main(String[] args) {
+        // Get system properties
+        Properties properties = System.getProperties();
+
+        // Create a scanner class
+        Scanner scanner = new Scanner(System.in);
+
+        // Get the file path
+        String filepath = "";
+        if (properties.getProperty("os.name").equals("Linux")) {
+            System.out.print("Input the desired filepath (default: bmp/lena.bmp): ");
+            filepath = scanner.nextLine();
+            if (filepath.isEmpty())
+                filepath = "bmp/lena.bmp";
+        } else { // Windows
+            System.out.print("Input the desired filepath (default: bmp\\lena.bmp): ");
+            filepath = scanner.nextLine();
+            if (filepath.isEmpty())
+                filepath = "bmp\\lena.bmp";
+        }
+        System.out.println();
+
+        // Determine whether it is grey or rgb
+        String color_scheme = "";
+        System.out.print("Pick a color scheme\n [0] Greyscale\n [1] RGB\nChoice (default: 0): ");
+        color_scheme = scanner.nextLine();
+        if (!color_scheme.equals("1"))
+            color_scheme = "0";
+        System.out.println();
+
+        // Fetch the options
+        String option = "";
+        System.out.println("Input desired effect:");
+        System.out.println(" [0] Flip Horizontally");
+        System.out.println(" [1] Flip Vertically");
+        System.out.println(" [2] Transpose");
+        System.out.println(" [3] Invert Colors");
+        System.out.println(" [4] Blur");
+        System.out.print("Choice (default: 0): ");
+        option = scanner.nextLine();
+        if (!option.equals("0") && !option.equals("1") && !option.equals("2") && !option.equals("3") && !option.equals("4"))
+            option = "0";
+        System.out.println();
+
+        // Get the output file path
+        String out_path = "";
+        System.out.print("Input the output filepath (default: output.bmp): ");
+        out_path = scanner.nextLine();
+        if (out_path.isEmpty())
+            out_path = "output.bmp";
+        System.out.println();
+
+        try {
+            // Let's go through the options
+            if (color_scheme.equals("0")) {
+                // Read in the bitmap
+                int[][] bmp = BitMap.ReadGreyScale(filepath);
+
+                // Run the correct option
+                switch (option) {
+                    case "0":
+                        FlipHorizontally(bmp);
+                        break;
+                    case "1":
+                        FlipVertically(bmp);
+                        break;
+                    case "2":
+                        Transpose(bmp);
+                        break;
+                    case "3":
+                        Invert(bmp);
+                        break;
+                    default:
+                        int k = 7;
+                        double sigma = 3;
+                        GaussianBlur(bmp, k, sigma);
+                        break;
                 }
-                bmp[i][j] = new_pixel;
+
+                // Display the file
+                Display.DisplayGreyscale(bmp);
+
+                // Output the file
+                BitMap.OutputGreyScale(out_path, bmp);
+            } else {
+                // Read in the bitmap
+                int[][][] bmp = BitMap.ReadRGB(filepath);
+
+                // Run the correct option
+                switch (option) {
+                    case "0":
+                        FlipHorizontally(bmp);
+                        break;
+                    case "1":
+                        FlipVertically(bmp);
+                        break;
+                    case "2":
+                        Transpose(bmp);
+                        break;
+                    case "3":
+                        Invert(bmp);
+                        break;
+                    default:
+                        int k = 7;
+                        double sigma = 3;
+                        GaussianBlur(bmp, k, sigma);
+                        break;
+                }
+
+                // Show the file
+                Display.DisplayRGB(bmp);
+
+                // Output the file
+                BitMap.OutputRGB(out_path, bmp);
             }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
-    }
-
-
-    // Ignore code down here unless you are curious
-    public static double[][] GenerateGaussianKernel(int k, double sigma) {
-        double[][] kernel = new double[k][k];
-
-        int mid = k / 2;
-
-        // Fill out the quadrants
-        double sum = 0;
-        for (int i = 0; i < mid; ++i) {
-            for (int j = 0; j < mid; ++j) {
-                double gaus = Gaussian(-3 + j, -3 + i, sigma);
-                kernel[i][j] = gaus;
-                kernel[i][k-1-j] = gaus;
-                kernel[k-1-i][j] = gaus;
-                kernel[k-1-i][k-1-j] = gaus;
-                sum += (gaus * 4);
-            }
-        }
-
-        // Fill out the middle
-        for (int i = 0; i < mid; ++i) {
-            double gaus = Gaussian(-3+i, 0, sigma);
-            kernel[mid][i] = gaus;
-            kernel[mid][k-1-i] = gaus;
-            kernel[i][mid] = gaus;
-            kernel[k-1-i][mid] = gaus;
-            sum += (gaus * 4);
-        }
-
-        // Fill middle
-        kernel[mid][mid] = Gaussian(0, 0, sigma);
-        sum += kernel[mid][mid];
-
-        // Normalize
-        for (int i = 0; i < k; ++i) {
-            for (int j = 0; j < k; ++j) {
-                kernel[i][j] /= sum;
-            }
-        }
-
-        return kernel;
-    }
-
-    public static double Gaussian(int x, int y, double sigma) {
-        double exponent = -1 * ((Math.pow(x, 2) + Math.pow(y,2)) / (2 * Math.pow(sigma, 2)));
-        double base = 1.0 / (2 * Math.PI * Math.pow(sigma, 2));
-        return base * Math.exp(exponent);
     }
 }
