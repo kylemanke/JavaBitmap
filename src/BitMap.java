@@ -289,7 +289,7 @@ public class BitMap {
                                 throw new Exception("Failed to read enough bytes");
                             }
                         }
-                        bmp[i][j][k] = (byte)buffer[idx++];
+                        bmp[i][j][k] = (buffer[idx++] & 0xFF);
                     }
                 }
                 // Skip padding
@@ -616,7 +616,7 @@ class BitMapHeader {
     public int important_colors_;
 
     // Color Table Field
-    public byte[][] color_table_;
+    public short[][] color_table_;
 
     // Constructor
     // Must remember bitmap is in little endian format
@@ -677,14 +677,14 @@ class BitMapHeader {
 
             offset.reset();
             byte[] color_table_buffer = new byte[num_entries * 4];
-            color_table_ = new byte[num_entries][3];
+            color_table_ = new short[num_entries][3];
             if (in.read(color_table_buffer) < num_entries)
                 throw new Exception("Failed to read in color palette");
 
             for (int i = 0; i < num_entries; ++i) {
-                color_table_[i][0] = color_table_buffer[offset.inc()]; // Blue
-                color_table_[i][1] = color_table_buffer[offset.inc()]; // Green
-                color_table_[i][2] = color_table_buffer[offset.inc()]; // Red
+                color_table_[i][0] = (short)(color_table_buffer[offset.inc()] & 0xFF); // Blue
+                color_table_[i][1] = (short)(color_table_buffer[offset.inc()] & 0xFF); // Green
+                color_table_[i][2] = (short)(color_table_buffer[offset.inc()] & 0xFF); // Red
                 offset.inc(); // Blank
             }
         } catch (IOException e) {

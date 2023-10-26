@@ -106,7 +106,7 @@ public class ImageProcessor {
     }
 
     // Gaussian Blurring: thanks to https://homepages.inf.ed.ac.uk/rbf/HIPR2/gsmooth.htm
-    public static void GaussianBlur(int[][] bmp, int k, double sigma) throws Exception {
+    public static int[][] GaussianBlur(int[][] bmp, int k, double sigma) throws Exception {
         // Kernel must be odd and positive
         if (k % 2 == 0) {
             throw new Exception("Kernel must have an odd size.");
@@ -119,38 +119,31 @@ public class ImageProcessor {
             sigma = 15;
 
         // Generate the kernel
-        double[] kernel = generate1DKernel(k, sigma);
+        double[][] kernel = generate2DKernel(k, sigma);
 
         // Create the output array
         int n = bmp.length, m = bmp[0].length;
-        double[][] horizontal = new double[n][m];
+        int[][] output = new int[n][m];
 
-        // Perform the first horizontal pass
+        // Perform the pass
+        int k_2 = k/2;
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                for (int z = -(k/2); z <= (k/2); ++z) {
-                    if (j + z >= 0 && j + z < m) {
-                        horizontal[i][j] += (bmp[i][j + z] * kernel[z + (k/2)]);
+                for (int z = -k_2; z <= k_2; ++z) {
+                    for (int y = -k_2; y <= k_2; ++y) {
+                        if (i + z >= 0 && i + z < n && j + y >= 0 && j + y < m) {
+                            output[i][j] += (int)(kernel[k_2 + z][k_2 + y] * bmp[i + z][j + y]);
+                        }
                     }
                 }
             }
         }
 
-        // Perform the vertical pass
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                for (int z = -(k/2); z <= (k/2); ++z) {
-                    if (i + z >= 0 && i + z < n) {
-                        bmp[i][j] = 0;
-                        bmp[i][j] += (int)(horizontal[i+z][j] * kernel[z + (k/2)]);
-                    }
-                }
-            }
-        }
+        return output;
     }
 
     // TODO: Fix gaussian
-    public static void GaussianBlur(int[][][] bmp, int k, double sigma) throws Exception {
+    public static int[][][] GaussianBlur(int[][][] bmp, int k, double sigma) throws Exception {
         // Check k
         if (k % 2 == 0)
             throw new Exception("Kernel size must be odd.");
@@ -162,73 +155,72 @@ public class ImageProcessor {
             sigma = 15;
 
         // Generate the kernel
-        double[] kernel = generate1DKernel(k, sigma);
+        double[][] kernel = generate2DKernel(k, sigma);
 
-        // Create the horiontal array
+        // Create the output array
         int n = bmp.length, m = bmp[0].length;
-        double[][][] horizontal = new double[n][m][3];
+        int[][][] output = new int[n][m][3];
 
-        // Perform the horizontal pass
+        // Perform the convolution
+        int k_2 = k/2;
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                for (int z = -(k/2); z <= (k/2); ++z) {
-                    if (j + z >= 0 && j + z < m) {
-                        horizontal[i][j][0] += (bmp[i][j+z][0] * kernel[z + (k/2)]);
-                        horizontal[i][j][1] += (bmp[i][j+z][1] * kernel[z + (k/2)]);
-                        horizontal[i][j][2] += (bmp[i][j+z][2] * kernel[z + (k/2)]);
+                double r = 0.0;
+                double g = 0.0;
+                double b = 0.0;
+                for (int z = -k_2; z <= k_2; ++z) {
+                    for (int y = -k_2; y <= k_2; ++y) {
+                        if (i + z >= 0 && i + z < n && j + y >= 0 && j + y < m) {
+                            r += (kernel[k_2 + z][k_2 + y] * bmp[i + z][j + y][0]);
+                            g += (kernel[k_2 + z][k_2 + y] * bmp[i + z][j + y][1]);
+                            b += (kernel[k_2 + z][k_2 + y] * bmp[i + z][j + y][2]);
+                        }
                     }
                 }
+                output[i][j][0] = (int) r;
+                output[i][j][1] = (int) g;
+                output[i][j][2] = (int) b;
             }
         }
 
-        // Perform the vertical pass
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                for (int z = -(k/2); z <= (k/2); ++z) {
-                    if (i + z >= 0 && i + z < n) {
-                        bmp[i][j][0] = 0; bmp[i][j][1] = 0; bmp[i][j][2] = 0;
-                        bmp[i][j][0] += (int)(horizontal[i+z][j][0] * kernel[z + (k/2)]);
-                        bmp[i][j][1] += (int)(horizontal[i+z][j][1] * kernel[z + (k/2)]);
-                        bmp[i][j][2] += (int)(horizontal[i+z][j][2] * kernel[z + (k/2)]);
-                    }
-                }
-            }
-        }
-
+        return output;
     }
 
-    private static double[] generate1DKernel(int k, double sigma) {
-        double[] kernel_1d = new double[k];
+    private static double[][] generate2DKernel(int k, double sigma) {
+        double[][] kernel_2d = new double[k][k];
 
         // Generate the kernel
         double sum = 0;
         int k_2 = k/2;
         for (int i = 0; i < k_2; ++i) {
-            kernel_1d[i] = gaussian(-k_2 + i, k_2, sigma);
-            kernel_1d[k - 1 - i] = kernel_1d[i];
-            sum += 8 * kernel_1d[i];
+            for (int j = 0; j < k_2; ++j) {
+                double val = gaussian(-k_2 + i, -k_2 + j, sigma);
+                kernel_2d[i][j] = val;
+                kernel_2d[i][k - 1 - j] = val;
+                kernel_2d[k - 1 - i][j] = val;
+                kernel_2d[k - 1 - i][k - 1 - j] = val;
+                sum += 4 * val;
+            }
         }
-        kernel_1d[k_2] = gaussian(0, k_2, sigma);
-        sum += 4 * kernel_1d[k_2];
+        for (int i = 0; i < k_2; ++i) {
+            double val = gaussian(-k_2 + i, 0, sigma);
+            kernel_2d[i][k_2] = val;
+            kernel_2d[k_2][i] = val;
+            kernel_2d[k-1-i][k_2] = val;
+            kernel_2d[k_2][k-1-i] = val;
+            sum += 4 * val;
+        }
+        kernel_2d[k_2][k_2] = gaussian(0,0, sigma);
+        sum += kernel_2d[k_2][k_2];
 
-        // Finish summing up the kernel
-        for (int i = -k_2 + 1; i < 0; ++i) {
-            for (int j = -k_2 + 1; j < 0; ++j) {
-                sum += 4 * gaussian(i, j, sigma);
+        // Normalize
+        for (int i = 0; i < k; ++i) {
+            for (int j = 0; j < k; ++j) {
+                kernel_2d[i][j] /= sum;
             }
         }
 
-        for (int i = -k_2 + 1; i < 0; ++i) {
-            sum += 4 * gaussian(i, 0, sigma);
-        }
-
-        sum += gaussian(0, 0, sigma);
-
-        // Normalize the vector
-        for (int i = 0; i < k; ++i)
-            kernel_1d[i] /= Math.sqrt(sum);
-
-        return kernel_1d;
+        return kernel_2d;
     }
 
     private static double gaussian(int x, int y, double sigma) {
@@ -314,7 +306,7 @@ public class ImageProcessor {
                     default:
                         int k = 7;
                         double sigma = 3;
-                        GaussianBlur(bmp, k, sigma);
+                        bmp = GaussianBlur(bmp, k, sigma);
                         break;
                 }
 
@@ -343,8 +335,8 @@ public class ImageProcessor {
                         break;
                     default:
                         int k = 7;
-                        double sigma = 5;
-                        GaussianBlur(bmp, k, sigma);
+                        double sigma = 3;
+                        bmp = GaussianBlur(bmp, k, sigma);
                         break;
                 }
 
